@@ -43,7 +43,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # définition du script d'entrée
 ENTRYPOINT ["entrypoint.sh"]
 
-# définition du répertoire de travail par défaut où on place l'application
+# Définition du répertoire de travail par défaut où on place l'application
 WORKDIR /var/www/html/
 
 # exécuter le conteneur indéfiniment
