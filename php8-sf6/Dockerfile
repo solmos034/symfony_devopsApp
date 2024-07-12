@@ -40,7 +40,7 @@ RUN git config --global user.email "salmahamidallah1@gmail.com" \
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# définir le script d'entrée
+# définition du script d'entrée
 ENTRYPOINT ["entrypoint.sh"]
 
 # définition du répertoire de travail par défaut où on place l'app
