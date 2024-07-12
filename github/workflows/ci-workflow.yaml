@@ -43,5 +43,4 @@ jobs:
           docker build -t solmos034/symfony_project:latest .
           docker push solmos034/symfony_project:latest
       - name: Run Docker Compose
-        run: |
-          docker-compose -f ./symfony_sevopsPrjt/docker-compose.yaml up -d
+        run: docker-compose -f "docker-compose.yml" up -d --build
