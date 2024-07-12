@@ -31,27 +31,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: List files for debugging
+        run: ls -R
+
       - name: Set up Docker Compose
-        run: docker-compose -f symfony_sevopsprjt/docker-compose.yaml up -d
+        run: docker-compose -f symfony_sevopsPrjt/docker-compose.yaml up -d
 
       - name: Wait for PostgreSQL to be ready
         run: |
           for i in {30..0}; do
-            if docker-compose -f symfony_sevopsprjt/docker-compose.yaml exec database pg_isready; then
+            if docker-compose -f symfony_sevopsPrjt/docker-compose.yaml exec -T database pg_isready; then
               break
             fi
             echo 'PostgreSQL is unavailable - sleeping'
             sleep 1
           done
 
-      - name: Build Docker containers
-        run: docker build -t my-symfony-app symfony_sevopsprjt/php8-sf6
+      - name: Build and Test Symfony Application
+        run: |
+          docker-compose -f symfony_sevopsPrjt/docker-compose.yaml exec php8-sf6 composer install
+          docker-compose -f symfony_sevopsPrjt/docker-compose.yaml exec php8-sf6 php bin/phpunit
 
-      - name: Install PHP dependencies
-        run: docker-compose -f symfony_sevopsprjt/docker-compose.yaml exec php8-sf6 composer install
-
-      - name: Run Symfony server
-        run: docker-compose -f symfony_sevopsprjt/docker-compose.yaml exec php8-sf6 symfony server:start -d
-
-      - name: Run tests
-        run: docker-compose -f symfony_sevopsprjt/docker-compose.yaml exec php8-sf6 php bin/phpunit
+      - name: Stop Docker Compose
+        run: docker-compose -f symfony_sevopsPrjt/docker-compose.yaml down
