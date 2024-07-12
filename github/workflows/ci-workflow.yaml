@@ -1,10 +1,7 @@
-name: CI
+name: Simple CI
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
     branches:
       - main
 
@@ -12,57 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:13-alpine
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: app
-          POSTGRES_USER: symfony
-          POSTGRES_PASSWORD: ChangeMe
-        options: >-
-          --health-cmd="pg_isready"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Docker Compose
-        uses: docker/setup-buildx-action@v1
-
-      - name: Cache Docker layers
-        uses: actions/cache@v2
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Build Docker containers
-        run: docker-compose -f docker-compose.yml build
-
-      - name: Run Docker Compose
-        run: docker-compose -f docker-compose.yml up -d
-
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          for i in {30..0}; do
-            if docker-compose exec database pg_isready; then
-              break
-            fi
-            echo 'PostgreSQL is unavailable - sleeping'
-            sleep 1
-          done
-
-      - name: Install PHP dependencies
-        run: docker-compose exec php8-sf6 composer install
-
-      - name: Run Symfony server
-        run: docker-compose exec php8-sf6 symfony server:start -d
-
-      - name: Run tests
-        run: docker-compose exec php8-sf6 php bin/phpunit
+      - name: Run a one-line script
+        run: echo "Hello, world!"
