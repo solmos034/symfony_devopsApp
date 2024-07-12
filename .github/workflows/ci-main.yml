@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: app
+          POSTGRES_USER: symfony
+          POSTGRES_PASSWORD: ChangeMe
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Compose
+        run: docker-compose -f symfony_devopsprjt/docker-compose.yaml up -d
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          for i in {30..0}; do
+            if docker-compose -f symfony_devopsprjt/docker-compose.yaml exec -T database pg_isready; then
+              break
+            fi
+            echo 'PostgreSQL is unavailable - sleeping'
+            sleep 1
+          done
+
+      - name: Build and Test Symfony Application
+        run: |
+          docker-compose -f symfony_devopsprjt/docker-compose.yaml exec php8-sf6 composer install
+          docker-compose -f symfony_devopsprjt/docker-compose.yaml exec php8-sf6 php bin/phpunit
+
+      - name: Stop Docker Compose
+        run: docker-compose -f symfony_devopsprjt/docker-compose.yaml down
